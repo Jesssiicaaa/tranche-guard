@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Milestone, Role } from "@/types";
 
 interface Props {
@@ -13,10 +13,26 @@ interface Props {
 export default function EvidenceModal({ milestone, role, projectId, onClose, onSuccess }: Props) {
   const [url, setUrl] = useState(milestone.evidence?.url || "");
   const [note, setNote] = useState(milestone.evidence?.note || "");
+  const [fileData, setFileData] = useState<string | null>(milestone.evidence?.fileData || null);
+  const [fileType, setFileType] = useState<"image" | "document">(milestone.evidence?.fileType || "image");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canSubmit = role === "Contractor" && (milestone.status === "LOCKED" || milestone.status === "REJECTED");
+  const conditions = milestone.conditions || [];
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setFileData(result.includes("base64,") ? result.split("base64,")[1] : result);
+      setFileType(file.type.startsWith("image/") ? "image" : "document");
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async () => {
     setError("");
@@ -25,7 +41,11 @@ export default function EvidenceModal({ milestone, role, projectId, onClose, onS
     const res = await fetch(`/api/projects/${projectId}/milestones/${milestone.id}/evidence`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url, note }),
+      body: JSON.stringify({
+        url,
+        note,
+        ...(fileData && { fileData, fileType }),
+      }),
     });
     if (res.ok) {
       onSuccess();
@@ -61,6 +81,25 @@ export default function EvidenceModal({ milestone, role, projectId, onClose, onS
             </div>
           )}
 
+          {conditions.length > 0 && (
+            <div style={{ background: "var(--bg)", borderRadius: "var(--radius)", border: "1px solid var(--border)", padding: 14, marginBottom: 18 }}>
+              <div style={{ fontWeight: 600, fontSize: "0.85rem", marginBottom: 10 }}>📋 Conditions to verify</div>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+                {conditions.map((c, i) => (
+                  <li key={i}>
+                    {c.description}
+                    <span style={{ marginLeft: 6, fontSize: "0.72rem", color: "var(--auditor)" }}>
+                      ({c.verificationType})
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="form-hint" style={{ marginTop: 8, marginBottom: 0 }}>
+                Paste a URL to an image (or upload a file). The judge will verify these conditions.
+              </p>
+            </div>
+          )}
+
           <div className="form-group">
             <label className="form-label">Evidence URL *</label>
             {canSubmit ? (
@@ -78,8 +117,34 @@ export default function EvidenceModal({ milestone, role, projectId, onClose, onS
                 </a>
               </div>
             )}
-            <p className="form-hint">Link to photos, inspection report, completion certificate, etc.</p>
+            <p className="form-hint">
+              Link to photos, inspection report, etc. If the URL points to an image, the judge can verify conditions from it — no file upload needed.
+            </p>
           </div>
+
+          {canSubmit && (
+            <div className="form-group">
+              <label className="form-label">Or upload file (optional)</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,.pdf,.doc,.docx"
+                onChange={handleFileChange}
+                style={{ fontSize: "0.85rem" }}
+              />
+              {fileData && (
+                <p className="form-hint" style={{ color: "var(--success)", marginTop: 4 }}>
+                  ✓ File attached — AI can verify conditions from this
+                </p>
+              )}
+            </div>
+          )}
+
+          {!canSubmit && milestone.evidence?.fileData && (
+            <p className="form-hint" style={{ marginBottom: 12 }}>
+              📎 Image/document was uploaded for AI verification
+            </p>
+          )}
 
           <div className="form-group">
             <label className="form-label">Note</label>
