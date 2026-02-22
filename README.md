@@ -173,5 +173,12 @@ The "Technical Appendix" panel in each project shows read-only XRPL transaction 
 - **No auth** — role switcher in header for demo purposes
 
 ---
+#Screenshots
+Here is a preview of the website:
+
+<img width="2864" height="1636" alt="image" src="https://github.com/user-attachments/assets/2d27ca31-799f-447c-937a-7c14d6299bba" />
+<img width="2864" height="1636" alt="image" src="https://github.com/user-attachments/assets/0c220924-0d4e-4e97-9eff-6e15fcda5121" />
+
+
 
 *Built for hackathon demo. Not production-ready — uses filesystem storage and has no authentication.*
