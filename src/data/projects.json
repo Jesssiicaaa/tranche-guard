@@ -1,0 +1,76 @@
+[
+  {
+    "id": "c7c10652-c0f3-4a95-bab7-c146b63869e3",
+    "title": "School construction",
+    "description": "School that is being built in x country",
+    "donorName": "globaled",
+    "contractorName": "buidlright",
+    "createdAt": "2026-02-22T04:11:01.681Z",
+    "milestones": [
+      {
+        "id": "bedea6d3-8699-4755-b0cd-f4e14298b551",
+        "title": "site clearnace",
+        "trancheAmount": 25000,
+        "deadline": "2026-04-11T00:00:00.000Z",
+        "status": "APPROVED",
+        "evidence": {
+          "url": "link",
+          "note": "contain the report ",
+          "submittedAt": "2026-02-22T04:16:13.350Z"
+        },
+        "approvedAt": "2026-02-22T04:16:51.302Z",
+        "auditorComment": ""
+      },
+      {
+        "id": "802ccaca-6151-4187-b3fc-a9bcf9d42419",
+        "title": "ofjoisefj",
+        "trancheAmount": 400,
+        "deadline": "2026-05-07T00:00:00.000Z",
+        "status": "LOCKED"
+      },
+      {
+        "id": "3200d755-b082-4100-8133-8b9629b7fa1e",
+        "title": "ejrkfef",
+        "trancheAmount": 40000,
+        "deadline": "2026-05-27T00:00:00.000Z",
+        "status": "LOCKED"
+      },
+      {
+        "id": "816ae1cd-fbca-46cc-9e49-22972cccef71",
+        "title": "iuerfnief",
+        "trancheAmount": 60000,
+        "deadline": "2026-06-16T00:00:00.000Z",
+        "status": "LOCKED"
+      }
+    ],
+    "auditLog": [
+      {
+        "id": "7d824d2b-d6bc-47aa-9a94-dce0eaef0dba",
+        "actor": "Donor",
+        "action": "PROJECT_CREATED",
+        "milestoneTitle": "—",
+        "milestoneIndex": -1,
+        "timestamp": "2026-02-22T04:11:01.682Z",
+        "detail": "Project \"School construction\" created with 4 milestones"
+      },
+      {
+        "id": "6a991730-0aab-4ef8-aa71-2d192f79d8f5",
+        "actor": "Contractor",
+        "action": "EVIDENCE_SUBMITTED",
+        "milestoneTitle": "site clearnace",
+        "milestoneIndex": 0,
+        "timestamp": "2026-02-22T04:16:13.351Z",
+        "detail": "URL: link | Note: contain the report "
+      },
+      {
+        "id": "f056c1c2-65ea-4580-8367-7203b5c68db6",
+        "actor": "Auditor",
+        "action": "MILESTONE_APPROVED",
+        "milestoneTitle": "site clearnace",
+        "milestoneIndex": 0,
+        "timestamp": "2026-02-22T04:16:51.302Z",
+        "detail": "Approved without comment"
+      }
+    ]
+  }
+]
