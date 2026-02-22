@@ -62,7 +62,7 @@ export default function AppPage() {
                   )}
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.82rem", marginBottom: "8px" }}>
                     <span className="text-muted">${released.toLocaleString()} released</span>
-                    <span className="text-muted">{completed}/4 milestones</span>
+                    <span className="text-muted">{completed}/{p.milestones.length} milestones</span>
                   </div>
                   <div className="progress-bar">
                     <div className="progress-fill" style={{ width: `${pct}%` }} />

@@ -1,16 +1,8 @@
 "use client";
-import { useState, createContext, useContext } from "react";
+import { useState } from "react";
 import "./globals.css";
 import type { Role } from "@/types";
-
-export const RoleContext = createContext<{
-  role: Role;
-  setRole: (r: Role) => void;
-}>({ role: "Donor", setRole: () => {} });
-
-export function useRole() {
-  return useContext(RoleContext);
-}
+import { RoleContext } from "@/lib/role-context";
 
 const ROLE_COLORS: Record<Role, string> = {
   Donor: "#2563eb",
