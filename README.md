@@ -178,7 +178,13 @@ Here is a preview of the website:
 
 <img width="2864" height="1636" alt="image" src="https://github.com/user-attachments/assets/2d27ca31-799f-447c-937a-7c14d6299bba" />
 <img width="2864" height="1636" alt="image" src="https://github.com/user-attachments/assets/0c220924-0d4e-4e97-9eff-6e15fcda5121" />
-
-
+<img width="2848" height="1656" alt="image" src="https://github.com/user-attachments/assets/63892556-88bf-4671-be40-16cf627f3002" />
+<img width="2820" height="1680" alt="image" src="https://github.com/user-attachments/assets/16508df6-9a33-47b0-8827-bb24d5eb0dbd" />
+<img width="2826" height="1652" alt="image" src="https://github.com/user-attachments/assets/6c25e626-11a0-44fb-aa7a-a35c5e740566" />
+<img width="2826" height="1488" alt="image" src="https://github.com/user-attachments/assets/a46e23fa-be73-43b9-b6bb-ac7501d5dea3" />
+<img width="2792" height="1614" alt="image" src="https://github.com/user-attachments/assets/1673e651-0c06-4505-b156-879b1e5b9c77" />
+<img width="970" height="1462" alt="image" src="https://github.com/user-attachments/assets/542220b6-1b0e-4dba-8f46-c601f47f248e" />
+<img width="966" height="1414" alt="image" src="https://github.com/user-attachments/assets/615e3e54-f15c-4a41-b1c4-d85332cfa4d4" />
+<img width="2640" height="1294" alt="image" src="https://github.com/user-attachments/assets/a025e5f8-6693-47a6-9165-b9e8bd0bc11b" />
 
 *Built for hackathon demo. Not production-ready — uses filesystem storage and has no authentication.*
