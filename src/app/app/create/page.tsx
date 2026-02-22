@@ -1,12 +1,21 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { ConditionVerificationType } from "@/types";
+
+interface ConditionInput {
+  description: string;
+  verificationType: ConditionVerificationType;
+}
 
 interface MilestoneInput {
   title: string;
   trancheAmount: string;
   deadline: string;
+  conditions: ConditionInput[];
 }
+
+const EMPTY_CONDITION: ConditionInput = { description: "", verificationType: "image" };
 
 export default function CreateProjectPage() {
   const router = useRouter();
@@ -15,16 +24,51 @@ export default function CreateProjectPage() {
   const [donorName, setDonorName] = useState("");
   const [contractorName, setContractorName] = useState("");
   const [milestones, setMilestones] = useState<MilestoneInput[]>([
-    { title: "", trancheAmount: "", deadline: "" },
-    { title: "", trancheAmount: "", deadline: "" },
-    { title: "", trancheAmount: "", deadline: "" },
-    { title: "", trancheAmount: "", deadline: "" },
+    { title: "", trancheAmount: "", deadline: "", conditions: [] },
+    { title: "", trancheAmount: "", deadline: "", conditions: [] },
+    { title: "", trancheAmount: "", deadline: "", conditions: [] },
+    { title: "", trancheAmount: "", deadline: "", conditions: [] },
   ]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const updateMilestone = (i: number, field: keyof MilestoneInput, val: string) => {
+  const updateMilestone = (i: number, field: keyof MilestoneInput, val: string | ConditionInput[]) => {
     setMilestones((prev) => prev.map((m, idx) => idx === i ? { ...m, [field]: val } : m));
+  };
+
+  const addCondition = (milestoneIdx: number) => {
+    setMilestones((prev) =>
+      prev.map((m, idx) =>
+        idx === milestoneIdx
+          ? { ...m, conditions: [...(m.conditions || []), { ...EMPTY_CONDITION }] }
+          : m
+      )
+    );
+  };
+
+  const updateCondition = (milestoneIdx: number, condIdx: number, field: keyof ConditionInput, val: string | ConditionVerificationType) => {
+    setMilestones((prev) =>
+      prev.map((m, idx) =>
+        idx === milestoneIdx
+          ? {
+              ...m,
+              conditions: (m.conditions || []).map((c, ci) =>
+                ci === condIdx ? { ...c, [field]: val } : c
+              ),
+            }
+          : m
+      )
+    );
+  };
+
+  const removeCondition = (milestoneIdx: number, condIdx: number) => {
+    setMilestones((prev) =>
+      prev.map((m, idx) =>
+        idx === milestoneIdx
+          ? { ...m, conditions: (m.conditions || []).filter((_, ci) => ci !== condIdx) }
+          : m
+      )
+    );
   };
 
   const handleSubmit = async () => {
@@ -51,6 +95,13 @@ export default function CreateProjectPage() {
           title: m.title,
           trancheAmount: parseFloat(m.trancheAmount),
           deadline: new Date(m.deadline).toISOString(),
+          conditions: (m.conditions || [])
+            .filter((c) => c.description?.trim())
+            .map((c) => ({
+              id: crypto.randomUUID(),
+              description: c.description.trim(),
+              verificationType: c.verificationType,
+            })),
         })),
       }),
     });
@@ -138,6 +189,58 @@ export default function CreateProjectPage() {
                   <input className="form-input" type="date" value={m.deadline}
                     onChange={(e) => updateMilestone(i, "deadline", e.target.value)} />
                 </div>
+              </div>
+
+              {/* Conditions — what must be verified before release (AI can verify from image/file) */}
+              <div className="form-group" style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+                <label className="form-label">Conditions (AI-verifiable from picture or file)</label>
+                <p className="form-hint" style={{ marginBottom: 12 }}>
+                  List what must be verified before funds release. AI can check images/documents, or Auditor can verify manually.
+                </p>
+                {(m.conditions || []).map((cond, ci) => (
+                  <div key={ci} style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "flex-start" }}>
+                    <input
+                      className="form-input"
+                      style={{ flex: 1 }}
+                      value={cond.description}
+                      onChange={(e) => updateCondition(i, ci, "description", e.target.value)}
+                      placeholder="e.g. Foundation concrete has been poured and cured"
+                    />
+                    <select
+                      className="form-select"
+                      style={{ width: 140 }}
+                      value={cond.verificationType}
+                      onChange={(e) => updateCondition(i, ci, "verificationType", e.target.value as ConditionVerificationType)}
+                    >
+                      <option value="image">Image (AI)</option>
+                      <option value="document">Document (AI)</option>
+                      <option value="manual">Manual (Auditor)</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => removeCondition(i, ci)}
+                      style={{ background: "none", border: "none", color: "var(--danger)", cursor: "pointer", padding: "8px 12px" }}
+                      title="Remove condition"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => addCondition(i)}
+                  style={{
+                    padding: "8px 14px",
+                    border: "2px dashed var(--border)",
+                    borderRadius: "var(--radius)",
+                    background: "transparent",
+                    color: "var(--text-muted)",
+                    fontSize: "0.82rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  + Add Condition
+                </button>
               </div>
             </div>
           ))}

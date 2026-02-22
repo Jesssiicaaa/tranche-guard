@@ -9,10 +9,62 @@ interface Props {
   onSuccess: () => void;
 }
 
+interface AiResult {
+  conditionIndex: number;
+  description: string;
+  verified: boolean;
+  note: string;
+}
+
 export default function ReviewModal({ milestone, projectId, onClose, onSuccess }: Props) {
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [aiResults, setAiResults] = useState<AiResult[] | null>(null);
+  const [aiVerifying, setAiVerifying] = useState(false);
+
+  const conditions = milestone.conditions || [];
+  // Judge can use: uploaded file (fileData) OR evidence URL (imageUrl) — no file dump required
+  const hasEvidenceForAi = !!(milestone.evidence?.fileData || milestone.evidence?.url);
+  const aiVerifiableConditions = conditions.filter((c) => c.verificationType === "image" || c.verificationType === "document");
+
+  const runAiVerification = async () => {
+    if ((!milestone.evidence?.fileData && !milestone.evidence?.url) || aiVerifiableConditions.length === 0) return;
+    setAiVerifying(true);
+    setAiResults(null);
+    const results: AiResult[] = [];
+    for (let i = 0; i < aiVerifiableConditions.length; i++) {
+      const c = aiVerifiableConditions[i];
+      try {
+        const res = await fetch("/api/verify-condition", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...(milestone.evidence?.fileData
+              ? { imageBase64: milestone.evidence.fileData }
+              : { imageUrl: milestone.evidence?.url }),
+            conditionDescription: c.description,
+          }),
+        });
+        const data = await res.json();
+        results.push({
+          conditionIndex: i,
+          description: c.description,
+          verified: data.verified ?? false,
+          note: data.note || (data.error ? String(data.error) : "—"),
+        });
+      } catch (err) {
+        results.push({
+          conditionIndex: i,
+          description: c.description,
+          verified: false,
+          note: `Error: ${err instanceof Error ? err.message : "Unknown"}`,
+        });
+      }
+    }
+    setAiResults(results);
+    setAiVerifying(false);
+  };
 
   const handleDecision = async (decision: "APPROVE" | "REJECT") => {
     if (decision === "REJECT" && !comment) {
@@ -78,6 +130,55 @@ export default function ReviewModal({ milestone, projectId, onClose, onSuccess }
               Submitted: {milestone.evidence?.submittedAt ? new Date(milestone.evidence.submittedAt).toLocaleString() : "—"}
             </div>
           </div>
+
+          {/* Conditions & AI Verification */}
+          {conditions.length > 0 && (
+            <div style={{ background: "var(--bg)", borderRadius: "var(--radius)", border: "1px solid var(--border)", padding: 16, marginBottom: 20 }}>
+              <div style={{ fontWeight: 600, fontSize: "0.85rem", marginBottom: 12 }}>📋 Conditions to verify</div>
+              <ul style={{ margin: "0 0 12px", paddingLeft: 18, fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+                {conditions.map((c, i) => (
+                  <li key={i}>
+                    {c.description}
+                    <span style={{ marginLeft: 6, fontSize: "0.72rem", color: "var(--auditor)" }}>
+                      ({c.verificationType})
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {hasEvidenceForAi && aiVerifiableConditions.length > 0 && (
+                <>
+                  <button
+                    className="action-btn btn-purple btn-sm"
+                    onClick={runAiVerification}
+                    disabled={aiVerifying}
+                  >
+                    {aiVerifying ? "Verifying…" : "🤖 Verify conditions with AI"}
+                  </button>
+                  {aiResults && (
+                    <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+                      <div style={{ fontWeight: 600, fontSize: "0.82rem", marginBottom: 8 }}>AI Verification Results</div>
+                      {aiResults.map((r, i) => (
+                        <div key={i} style={{ marginBottom: 10, fontSize: "0.85rem" }}>
+                          <span style={{ color: r.verified ? "var(--success)" : "var(--danger)", fontWeight: 600 }}>
+                            {r.verified ? "✓" : "✗"}
+                          </span>{" "}
+                          {r.description}
+                          <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: 4, marginLeft: 18 }}>
+                            {r.note}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+              {conditions.length > 0 && !hasEvidenceForAi && (
+                <p className="form-hint" style={{ marginTop: 8, marginBottom: 0 }}>
+                  No image/document uploaded. Contractor can add one for AI verification.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="form-group">
             <label className="form-label">Auditor Comment</label>
